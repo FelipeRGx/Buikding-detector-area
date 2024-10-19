@@ -1,88 +1,90 @@
-# Object-Detection
 
-In this tutorial, we will show you how to build an object detector for a custom dataset. You can find the custom dataset in the input/images folder. The goal is to detect the square, circle, and triangle shapes in the images.
+# Construction Area Detector Using YOLO and Satellite Images
 
-<p float="left">
-<img src=docs/object-detect.png />
-<img src=docs/object-detect-second-example.png/>
-</p>
+## Project Overview
 
-We adapted the Dockerfile provided by Tensorflow and prepared a docker container preloaded with all the necessary libraries to get you started quickly to build your own object detection using custom dataset. We modified the scripts provided by Tensorflow and from other excellent online tutorials eg. https://github.com/bourdakos1/Custom-Object-Detection to give an easy to follow step by step tutorial.
+This project involves the development of an AI-based detector to calculate the square meters of construction from satellite images. It uses the YOLO (You Only Look Once) model to detect building areas and segment the rooftops of constructions from satellite imagery. This information can be used for automated property assessments, urban planning, and construction monitoring.
 
-Install Docker:
+## Dataset and Images
 
-https://docs.docker.com/v17.12/docker-for-mac/install/#install-and-run-docker-for-mac
+The dataset consists of satellite images of residential areas. The project uses labeled data where the rooftops of buildings have been segmented for training purposes. The dataset contains both the original images and annotated ones, which are stored in the `docs` folder. Example images are provided:
 
-Clone the repository (https://github.com/aiformankind/object-detection):
-```
-git clone https://github.com/aiformankind/object-detection.git
-```
+- `1.jpeg`: Sample segmented image (blue areas indicate construction).
+- `2.jpeg`: Another example of segmented constructions.
+- `3.jpeg`: Example image showing the segmentation of the building rooftops.
+- `4.jpeg`: Before and after comparison of the original image and the AI-generated segmentation.
+- `5.jpeg`: Another comparison for model validation.
 
-Go to the repository directory that you just clone:
-```
-cd object-detection
-```
+These images can be found in the `docs` folder and are essential for visualizing the results of the model's performance.
 
-Build the Tensorflow docker (this job will pull the latest tensorflow images and set up the environment) :
-```
-docker build -t aiformankind/objectdetection:0.0.1 .
-```
+## Technologies Used
 
-Start the Tensorflow container (this job will spin up the objectdetection container):
-```
-docker run -it -p 8888:8888 -p 6006:6006 --name=objectdetection aiformankind/objectdetection:0.0.1
-```
-Train model:
-You can stop the training by pressing CTRL-C after iteration step ~200.
-```
-python models/research/object_detection/legacy/train.py --logtostderr --train_dir=/tensorflow/train/ --pipeline_config_path=/tensorflow/train/faster_rcnn_resnet101.config
+- **YOLOv8**: For object detection and segmentation of rooftops.
+- **Python**: For scripting and training the YOLO model.
+- **OpenCV**: For image processing.
+- **Gradio**: For creating an interactive web interface to upload images and see segmentation results.
+- **Matplotlib**: For visualizing the results.
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-repo/construction-area-detector.git
+cd construction-area-detector
 ```
 
-Create a frozen inference graph:
-Replace model.ckpt-XXX with the largest(latest) checkpoint file number. Look it up in the /tensorflow/train folder
+2. Install the required dependencies:
 
-```
-python models/research/object_detection/export_inference_graph.py --input_type image_tensor --pipeline_config_path /tensorflow/train/faster_rcnn_resnet101.config --trained_checkpoint_prefix /tensorflow/train/model.ckpt-XXX --output_directory /tensorflow/inference_graph
-```
-
-Start jupyter notebook
-```
-jupyter notebook --ip 0.0.0.0 --no-browser --allow-root
+```bash
+pip install -r requirements.txt
 ```
 
-You can access the jupyter notebook on browser. Find the object_detection_shapes.ipynb in /tensorflow/models/research/object-detection folder.
+3. Download YOLOv8 from the official `ultralytics` repository and set up the environment.
 
-Run the notebook to see the our model in action. In the last cell, we use the model to detect and identify the square, circle, triangle in the test images.
+4. Place the training images in the appropriate folder (`data/images`), ensuring they are labeled correctly.
 
-### Prepare Custom Dataset
-First, you have to annotate your images by building bounding boxes around the objects you want to detect. There are many tools you can use. Among them are [labelImg](https://github.com/tzutalin/labelImg), [RectLabel](https://rectlabel.com/), and [Labelbox](https://labelbox.com/).
+## Training the Model
 
-You can find the custom images for this tutorial in the /tensorflow/input/images folder. The annotations of bounding boxes are described using XML format. These xmls are stored in /tensorflow/input/annotations/xmls folder. See <bndbox> XML element which describes the bounding box in the xml below. All the annotation tools mentioned above provide easy to use UI interface to draw the bounding boxes(annotations) and have the export option to create these XMLs automatically from your annotated images. 
+1. Prepare the dataset, ensuring each image is annotated for the specific regions of interest (in this case, the rooftops of constructions).
+2. Train the YOLO model using the following command:
 
+```bash
+python train.py --data data.yaml --weights yolov8.pt --epochs 100 --batch-size 16
 ```
-<annotation>
-    <folder>tmpda5w5lkl</folder>
-    <filename>cjov38btu6ya00975ow2d6t59.jpeg</filename>
-    <path>/tmp/tmpda5w5lkl/cjov38btu6ya00975ow2d6t59.jpeg</path>
-    <source>
-        <database>Unknown</database>
-    </source>
-    <size>
-        <width>1257</width>
-        <height>1676</height>
-        <depth>3</depth>
-    </size>
-    <segmented>0</segmented>
-    <object>
-        <name>Triangle</name>
-        <pose>Unspecified</pose>
-        <truncated>0</truncated>
-        <difficult>0</difficult>
-        <bndbox>
-                <xmin>584</xmin>
-                <ymin>449</ymin>
-                <xmax>936</xmax>
-                <ymax>794</ymax>
-            </bndbox>
-        </object>
-```        
+
+The `data.yaml` file should specify the path to the images and their annotations.
+
+3. After training, the model weights will be saved in the `runs` folder.
+
+## Running the Model
+
+Once the model is trained, you can use it to predict the construction areas on new satellite images.
+
+```bash
+python predict.py --weights best.pt --source data/test_images --save-txt --save-conf
+```
+
+This command will process the test images and output the detected areas with bounding boxes or segmentation masks in the `results` folder.
+
+## Web Interface
+
+A simple web interface is provided to allow users to upload satellite images and receive the estimated square meters of construction.
+
+1. Run the Gradio app:
+
+```bash
+python app.py
+```
+
+2. Open the local URL provided by Gradio, and upload a satellite image to get the segmentation result.
+
+## Results
+
+The output includes images with segmented rooftops, where each detected region represents a building area. The results can be visualized as images in the `results` folder, and the calculated square meters of the segmented areas are printed as output.
+
+---
+
+This project demonstrates the use of satellite images and YOLO for detecting construction areas and estimating their square meters. The system is scalable and can be fine-tuned for other types of buildings or urban settings.
+
+For more details, see the `docs` folder for visual examples and annotated datasets.
