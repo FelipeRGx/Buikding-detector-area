@@ -7,6 +7,18 @@ This project involves the development of an AI-based detector to calculate the s
 
 ## Dataset and Images
 
+### Image 1: Segmentation Example
+![Segmentation Example](docs/1.jpeg)
+
+### Image 2: Construction Area Segmentation
+![Construction Area Segmentation](docs/2.jpeg)
+
+### Image 3: Rooftop Segmentation
+![Rooftop Segmentation](docs/3.jpeg)
+
+### Image 4: Before and After Segmentation
+![Before and After Segmentation](docs/4.jpeg)
+
 The dataset consists of satellite images of residential areas. The project uses labeled data where the rooftops of buildings have been segmented for training purposes. The dataset contains both the original images and annotated ones, which are stored in the `docs` folder. Example images are provided:
 
 - `1.jpeg`: Sample segmented image (blue areas indicate construction).
